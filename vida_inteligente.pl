@@ -81,7 +81,6 @@ requisitos(civilizacion_avanzada, [vida_inteligente, habitable, fotosintesis_pos
 % Caso 1: La condición es una REGLA (tiene requisitos)
 por_que(Condicion, Planeta, [inferido(Condicion) | ExplicacionHijos]) :-
     requisitos(Condicion, ListaReqs),
-    % !, <-- ¡ESTE CORTE CAUSABA EL ERROR! Ha sido eliminado.
     demostrar_lista(ListaReqs, Planeta, ExplicacionHijos).
 
 % Caso 2: La condición es un HECHO BASE (no tiene requisitos)
@@ -138,7 +137,6 @@ indent(Nivel) :-
 
 % ======= Submenús de Interfaz de Usuario =======
 
-% --- AHORA MANEJA LOS 3 CASOS DE VARIABLES ---
 consultar_inferencia :-
     nl, writeln('--- Consultar Inferencia (inferir/2) ---'),
     writeln('Ej: Condicion = vida_inteligente, Planeta = P.'),
@@ -197,5 +195,4 @@ consultar_demostracion :-
       demostrar(Condicion, Planeta)
     ).
 
-% ===== EJECUCIÓN AUTOMÁTICA =====
 :- initialization(inicio, main).

@@ -76,17 +76,15 @@ requisitos(habitable, [tiene_atmosfera, tiene_magnetosfera, tiene_gravedad_estab
 requisitos(fotosintesis_posible, [tiene_luz_solar]).
 requisitos(civilizacion_avanzada, [vida_inteligente, habitable, fotosintesis_posible]).
 
-% Explicación (por_que/3)
+% Explicación (por_que/3) - USADO POR 'inferir/2'
 
 % Caso 1: La condición es una REGLA (tiene requisitos)
-% Construye la explicación [inferido(Cond) | ExplicacionDeHijos]
 por_que(Condicion, Planeta, [inferido(Condicion) | ExplicacionHijos]) :-
     requisitos(Condicion, ListaReqs),
-    !,
+    % !, <-- ¡ESTE CORTE CAUSABA EL ERROR! Ha sido eliminado.
     demostrar_lista(ListaReqs, Planeta, ExplicacionHijos).
 
 % Caso 2: La condición es un HECHO BASE (no tiene requisitos)
-% La explicación es simplemente el hecho base.
 por_que(Condicion, Planeta, [hecho_base(Condicion)]) :-
     \+ requisitos(Condicion, _),
     hecho(Planeta, Condicion).
@@ -98,16 +96,14 @@ demostrar_lista([Req | RestoReqs], Planeta, ExplicacionTotal) :-
     demostrar_lista(RestoReqs, Planeta, ExplicacionResto),
     append(ExplicacionReq, ExplicacionResto, ExplicacionTotal).
 
-% Predicados de consulta (demostraciones)
-% Verifica si una condición es verdadera (TRUE/FALSE o instancia variable).
-% Simplemente llama a por_que/3 y descarta la explicación.
+% Predicado 'inferir/2' (para Opción 3)
 inferir(Condicion, Planeta) :-
     por_que(Condicion, Planeta, _Explicacion).
 
 
-% ======= Predicados de consulta (Demostraciones) =======
+% ======= Predicados de consulta (Demostraciones) - USADO POR 'demostrar/2' =======
 
-% Arbol jerarquico de la demostracion
+% Arbol jerarquico de la demostracion (para Opción 4)
 demostrar(Condicion, Planeta) :-
     format('--- Demostracion de [~w] para [~w] ---~n', [Condicion, Planeta]),
     ( por_que_jerarquico(Condicion, Planeta, 0) ->
@@ -124,6 +120,7 @@ por_que_jerarquico(Condicion, Planeta, Nivel) :-
     imprimir_lista_jerarquica(ListaReqs, Planeta, NivelSiguiente).
 
 por_que_jerarquico(Condicion, Planeta, Nivel) :-
+    \+ requisitos(Condicion, _), % Guarda para evitar re-probar reglas
     hecho(Planeta, Condicion),
     indent(Nivel), format('Hecho_Base: ~w~n', [Condicion]).
 
@@ -139,39 +136,66 @@ indent(Nivel) :-
     forall(between(1, Espacios, _), write(' ')).
 
 
-% Submenú para consultar inferencia (inferir/2)
+% ======= Submenús de Interfaz de Usuario =======
+
+% --- AHORA MANEJA LOS 3 CASOS DE VARIABLES ---
 consultar_inferencia :-
     nl, writeln('--- Consultar Inferencia (inferir/2) ---'),
     writeln('Ej: Condicion = vida_inteligente, Planeta = P.'),
+    writeln('Ej: Condicion = C (variable), Planeta = tierra.'),
     writeln('Ej: Condicion = habitable, Planeta = tierra.'),
     write('Ingrese Condicion: '), read(Condicion),
     write('Ingrese Planeta (o P para variable): '), read(Planeta),
-    ( var(Planeta) -> % Si el planeta es una variable (P)
+    
+    ( var(Planeta) -> 
+        % CASO 1: Condicion=fija, Planeta=variable
         writeln('Buscando planetas que cumplen...'),
-        % setof/3 es como findall/3 pero ordena y elimina duplicados
         ( setof(P, inferir(Condicion, P), Soluciones) ->
             format('Planetas con ~w:~n', [Condicion]),
             maplist(writeln_sol, Soluciones)
-        ;    format('No se encontraron planetas con ~w.~n', [Condicion])
+        ;   format('No se encontraron planetas con ~w.~n', [Condicion])
         )
-    ; % Si el planeta está instanciado (ej: tierra)
+        
+    ; var(Condicion) ->
+        % CASO 2: Condicion=variable, Planeta=fijo (¡NUEVO!)
+        writeln('Buscando condiciones que cumplen...'),
+        % setof/3 usa inferir/2 y el backtracking de Prolog para encontrar todo
+        ( setof(C, inferir(C, Planeta), Soluciones) ->
+            format('Condiciones cumplidas por ~w:~n', [Planeta]),
+            maplist(writeln_sol, Soluciones)
+        ;   format('No se encontraron condiciones cumplidas por ~w.~n', [Planeta])
+        )
+
+    ; % CASO 3: Ambos fijos
         ( inferir(Condicion, Planeta) ->
             format('CONFIRMADO: Si, ~w cumple con ~w.~n', [Planeta, Condicion])
         ; format('NEGATIVO: No, ~w no cumple con ~w.~n', [Planeta, Condicion])
         )
     ).
+
 writeln_sol(S) :- format('  - ~w~n', [S]).
 
 % Submenú para consultar demostrar inferencia (demostrar/2)
 consultar_demostracion :-
     nl, writeln('--- Demostrar Inferencia (por_que/3) ---'),
     writeln('Ej: Condicion = vida_inteligente, Planeta = tierra.'),
+    writeln('Ej: Condicion = C (variable), Planeta = tierra.'),
     write('Ingrese Condicion: '), read(Condicion),
     write('Ingrese Planeta (debe ser especifico): '), read(Planeta),
     ( var(Planeta) ->
-        writeln('Error: El planeta debe ser especifico (no una variable).')
-    ; % Llama a demostrar/2 que ya imprime el resultado
+        writeln('Error: El Planeta debe ser especifico (no una variable).')
+    ; var(Condicion) ->
+        % Modo "Buscar Todos los Hechos Base"
+        nl, format('--- Buscando todos los HECHOS BASE para [~w] ---~n', [Planeta]),
+        (   hecho(Planeta, CondicionHecho), % Usamos una variable nueva
+            format('  Hecho_Base: ~w~n', [CondicionHecho]),
+            fail
+        ;   true % Siempre tiene éxito al final
+        ),
+        format('--- Fin de la busqueda de hechos para [~w] ---~n', [Planeta])
+    ; % Modo "Demostrar Uno"
       demostrar(Condicion, Planeta)
     ).
 
+% ===== EJECUCIÓN AUTOMÁTICA =====
 :- initialization(inicio, main).

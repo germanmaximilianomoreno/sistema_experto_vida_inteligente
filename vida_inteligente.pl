@@ -73,7 +73,7 @@ requisitos(vida_basica, [tiene_atmosfera, tiene_agua_liquida, tiene_elementos_bi
 requisitos(vida_compleja, [vida_basica, tiene_evolucion_biologica, tiene_superficie_solida]).
 requisitos(vida_inteligente, [vida_compleja, tiene_tecnologia]).
 requisitos(habitable, [tiene_atmosfera, tiene_magnetosfera, tiene_gravedad_estable, tiene_ciclo_dia_noche]).
-requisitos(fotosintesis_posible, [tiene_luz_solar]).
+requisitos(fotosintesis_posible, [tiene_luz_solar, tiene_atmosfera]).
 requisitos(civilizacion_avanzada, [vida_inteligente, habitable, fotosintesis_posible]).
 
 % Explicación (por_que/3) - USADO POR 'inferir/2'

@@ -154,6 +154,7 @@ consultar_inferencia :-
     writeln('Ej: Condicion = vida_inteligente, Planeta = P.'),
     writeln('Ej: Condicion = C (variable), Planeta = tierra.'),
     writeln('Ej: Condicion = habitable, Planeta = tierra.'),
+    nl,
     write('Ingrese Condicion: '), read(Condicion),
     write('Ingrese Planeta (o P para variable): '), read(Planeta),
     
@@ -190,6 +191,7 @@ consultar_demostracion :-
     nl, writeln('--- Demostrar Inferencia (por_que/3) ---'),
     writeln('Ej: Condicion = vida_inteligente, Planeta = tierra.'),
     writeln('Ej: Condicion = C (variable), Planeta = tierra.'),
+    nl,
     write('Ingrese Condicion: '), read(Condicion),
     write('Ingrese Planeta (debe ser especifico): '), read(Planeta),
     ( var(Planeta) ->

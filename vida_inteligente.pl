@@ -1,3 +1,14 @@
+/*
+
+Proyecto en Prolog
+Evaluación de vida inteligente en varios planetas
+
+Materia: Lógica para las Ciencias Informáticas
+Profesor: Carlos Eduardo Alvez
+Alumnos: Joaquín Lemos, Germán Maximiliano Moreno
+
+*/
+
 % Librerias
 :- use_module(library(csv)).
 :- use_module(library(lists)).
@@ -135,8 +146,9 @@ indent(Nivel) :-
     forall(between(1, Espacios, _), write(' ')).
 
 
-% ======= Submenús de Interfaz de Usuario =======
+% =======  Interfaz de Usuario de opciones 3 y 4 del menú =======
 
+% Interfaz de Usuario para consultar inferencia (inferir/2)
 consultar_inferencia :-
     nl, writeln('--- Consultar Inferencia (inferir/2) ---'),
     writeln('Ej: Condicion = vida_inteligente, Planeta = P.'),
@@ -173,7 +185,7 @@ consultar_inferencia :-
 
 writeln_sol(S) :- format('  - ~w~n', [S]).
 
-% Submenú para consultar demostrar inferencia (demostrar/2)
+% Interfaz de Usuario para consultar demostrar inferencia (demostrar/2)
 consultar_demostracion :-
     nl, writeln('--- Demostrar Inferencia (por_que/3) ---'),
     writeln('Ej: Condicion = vida_inteligente, Planeta = tierra.'),
@@ -195,4 +207,5 @@ consultar_demostracion :-
       demostrar(Condicion, Planeta)
     ).
 
+% Inicialización del programa
 :- initialization(inicio, main).

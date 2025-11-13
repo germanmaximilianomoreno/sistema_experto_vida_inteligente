@@ -168,7 +168,7 @@ consultar_inferencia :-
         )
         
     ; var(Condicion) ->
-        % CASO 2: Condicion=variable, Planeta=fijo (¡NUEVO!)
+        % CASO 2: Condicion=variable, Planeta=fijo
         writeln('Buscando condiciones que cumplen...'),
         % setof/3 usa inferir/2 y el backtracking de Prolog para encontrar todo
         ( setof(C, inferir(C, Planeta), Soluciones) ->
